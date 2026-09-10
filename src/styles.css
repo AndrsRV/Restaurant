@@ -1,9 +1,15 @@
+body {
+    width: 100%;
+    background-color: #f5ead8;
+}
+
+
 header {
     display: flex;
     align-items: center;
     width: 100%;
-    padding: 30px;
-    /* background-color: ; */
+    justify-content: space-between;
+    /* padding: 30px; */
 }
 
 header .logo{
@@ -15,11 +21,17 @@ header .logo img{
     width: 100px;
 }
 
+.logo{
+    display: flex;
+    align-items: center;
+}
+
 header nav{
     margin-left: 75px;
     display: flex;
     justify-content: flex-start;
     gap: 25px;
+    margin-right: 100px;
 }
 
 button {
