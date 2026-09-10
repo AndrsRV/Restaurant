@@ -1,47 +1,440 @@
-body {
-    width: 100%;
-    background-color: #f5ead8;
+/*
+  styles.css — every rule for this site.
+
+  Read it top to bottom: base (resets and type), then layout, then the
+  header and footer, then the small reusable pieces. Every color, font,
+  radius and shadow is a var(--...) from tokens.css — there is not one
+  hard-coded hex in this file, which is why retuning the design system
+  restyles the whole site without touching anything here.
+
+  Two ideas do most of the responsive work:
+    - clamp(min, preferred, max) for anything that should scale with the
+      window: clamp(20px, 5vw, 64px) is "5% of the width, but never below
+      20 or above 64". No media queries needed.
+    - repeat(auto-fit, minmax(280px, 1fr)) for column grids: fit as many
+      280px-or-wider columns as will go, then wrap. That is what makes
+      every two- and three-column block collapse on a phone by itself.
+*/
+
+/* ============================================================
+   1. BASE
+   ============================================================ */
+
+/* border-box means padding and borders count inside an element's width,
+   which is what you almost always want. */
+*, *::before, *::after {
+  box-sizing: border-box;
 }
 
+body {
+  margin: 0;
+  /* Column flex + flex:1 on #content pins the footer to the bottom even
+     when a view is short. */
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-body);
+}
+
+#content {
+  flex: 1;
+}
+
+h1, h2, h3 {
+  font-family: var(--font-heading);
+  font-weight: var(--font-heading-weight);
+  letter-spacing: -0.015em;   /* display faces need slight negative tracking */
+  text-wrap: balance;          /* evens out the last line of a heading */
+}
+
+h1 { font-size: clamp(38px, 5.2vw, 56px); line-height: 1.06; margin: 0 0 18px; }
+h2 { font-size: clamp(28px, 3.4vw, 34px); line-height: 1.12; margin: 0 0 24px; }
+h3 { font-size: 25px; line-height: 1.12; margin: 0 0 8px; }
+
+p {
+  font-size: 17px;
+  line-height: 1.65;
+  color: var(--color-neutral-800);   /* softer than pure ink, easier to read */
+  margin: 0 0 12px;
+  text-wrap: pretty;                 /* avoids single-word last lines */
+}
+p:last-child { margin-bottom: 0; }
+
+a { color: var(--color-accent-700); text-underline-offset: 3px; }
+a:hover { color: var(--color-accent-600); }
+
+/* Keyboard focus, styled rather than left as the browser's blue ring. */
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--color-accent) 30%, transparent);
+}
+
+/* ============================================================
+   2. LAYOUT
+   ============================================================ */
+
+/* The content column. Every section wraps its contents in this so text
+   lines up down the whole page, whatever the window width. */
+.wrap {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 0 clamp(20px, 5vw, 64px);
+}
+
+/* Two columns that become one on narrow screens. No media query. */
+.split {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: clamp(28px, 5vw, 56px);
+  align-items: center;
+  padding-top: clamp(20px, 4vw, 40px);
+  padding-bottom: clamp(40px, 6vw, 72px);
+}
+/* min-width: 0 lets a grid child shrink below its content's natural width;
+   without it, one long word can stretch a whole column. */
+.split > * { min-width: 0; }
+
+.split-top { align-items: start; }
+
+/* The heading block at the top of the Menu view. */
+.intro {
+  padding-top: clamp(20px, 4vw, 40px);
+  padding-bottom: clamp(32px, 5vw, 56px);
+}
+
+/* A full-width tinted strip. Note it has no .wrap padding of its own —
+   the band spans the window, the .wrap inside it holds the content. */
+.band {
+  background: var(--color-surface);
+  padding: clamp(40px, 6vw, 72px) 0;
+}
+
+/* Two things pushed apart, stacking when there is no room. */
+.row-between {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  align-items: center;
+  justify-content: space-between;
+}
+.row-between > * { min-width: 0; }
+
+.media-col { display: flex; justify-content: center; }
+
+.mt { margin-top: 20px; }
+
+/* ============================================================
+   3. HEADER
+   ============================================================ */
 
 header {
-    display: flex;
-    align-items: center;
-    width: 100%;
-    justify-content: space-between;
-    /* padding: 30px; */
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 24px;
+  width: 100%;
+  max-width: 1180px;      /* same column as .wrap, so the logo lines up
+                             with the headline below it */
+  margin: 0 auto;
+  padding: 22px clamp(20px, 5vw, 64px);
 }
 
-header .logo{
-    border-radius: 50%;
-    margin-bottom: 10px;
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-family: var(--font-heading);
+  font-size: 22px;
+  letter-spacing: -0.015em;
+}
+.logo p { margin: 0; font-size: inherit; color: var(--color-text); }
+.logo img {
+  width: 42px;
+  height: 42px;
+  flex: none;             /* never let flex squash the logo */
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
 }
 
-header .logo img{
-    width: 100px;
+/* margin-left: auto on a flex child pushes it, and everything after it,
+   to the far end. Cleaner than floats or absolute positioning. */
+nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  margin-left: auto;
 }
 
-.logo{
-    display: flex;
-    align-items: center;
+nav button {
+  border: 0;
+  cursor: pointer;
+  padding: 10px 18px;
+  border-radius: 999px;    /* any number this large gives a perfect pill */
+  background: transparent;
+  color: var(--color-text);
+  font-family: var(--font-body);
+  font-size: 15px;
+  font-weight: 600;
+  transition: background-color 0.18s ease;
+}
+nav button:hover { background: var(--color-neutral-200); }
+nav button.is-active { background: var(--color-surface); }  /* set by index.js */
+
+/* ============================================================
+   4. BUTTONS
+   ============================================================ */
+
+.btn {
+  cursor: pointer;
+  padding: 15px 28px;
+  border-radius: 999px;
+  font-family: var(--font-heading);
+  font-weight: var(--font-heading-weight);
+  font-size: 16px;
+  transition: background-color 0.18s ease;
 }
 
-header nav{
-    margin-left: 75px;
-    display: flex;
-    justify-content: flex-start;
-    gap: 25px;
-    margin-right: 100px;
+.btn-primary {
+  border: 0;
+  background: var(--color-accent);
+  color: var(--color-bg);
+}
+.btn-primary:hover { background: var(--color-accent-600); }
+
+.btn-secondary {
+  background: transparent;
+  border: 1px solid var(--color-divider);
+  color: var(--color-text);
+}
+.btn-secondary:hover { background: var(--color-neutral-200); }
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;             /* gap, not margins — nothing to clean up if you
+                            add or remove a button */
+  align-items: center;
+  margin-top: 26px;
 }
 
-button {
-    width: 100px;
-    height: 35px;
-    padding: 5px;
-    font-size: medium;
-    font-weight: bold;
-    border-radius: 20px;
-    cursor: pointer;
-    transition: background-color 0.2s ease;
-    /* background-color: ; */
+/* ============================================================
+   5. TEXT PIECES
+   ============================================================ */
+
+/* The small uppercase line above a headline. */
+.kicker {
+  font-size: 13px;
+  letter-spacing: 0.12em;   /* uppercase needs extra tracking to breathe */
+  text-transform: uppercase;
+  color: var(--color-accent-700);
+  margin: 0 0 14px;
 }
+
+/* One size up from body copy, for the paragraph right after an h1.
+   46ch caps the line at roughly 46 characters — long lines are tiring. */
+.lead {
+  font-size: 18px;
+  line-height: 1.6;
+  max-width: 46ch;
+}
+
+/* ============================================================
+   6. PRICE LIST (home)
+   ============================================================ */
+
+.price-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 640px;
+}
+
+.price-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+  background: var(--color-bg);   /* cream pill on the sand band */
+  border-radius: 999px;
+  padding: 16px clamp(20px, 3vw, 30px);
+}
+
+.price-name,
+.price {
+  font-family: var(--font-heading);
+  font-weight: var(--font-heading-weight);
+  font-size: clamp(20px, 2.6vw, 24px);
+}
+
+.price { color: var(--color-accent-700); }
+
+/* The line between name and price: an empty element with flex: 1, so it
+   absorbs all the leftover width whatever the name's length. */
+.leader {
+  flex: 1;
+  min-width: 24px;
+  height: 1px;
+  background: var(--color-divider);
+}
+
+/* ============================================================
+   7. CARDS
+   ============================================================ */
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 20px;
+  padding-bottom: clamp(40px, 6vw, 72px);
+}
+/* Narrower minimum, so three fit across instead of two. */
+.cards-3 {
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  padding-bottom: 0;
+}
+.cards > * { min-width: 0; }
+
+.card {
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  padding: clamp(24px, 3vw, 32px);
+}
+/* Inside a sand band, flip the card to cream so it still reads as a card. */
+.band .card { background: var(--color-bg); }
+
+.card-body { font-size: 15px; line-height: 1.6; }
+
+.card-price {
+  font-family: var(--font-heading);
+  font-weight: var(--font-heading-weight);
+  font-size: 30px;
+  color: var(--color-accent-700);
+  margin: 18px 0 0;
+}
+
+/* The numbered circle on the About steps. flex centering is the simplest
+   way to put one character dead center in a circle. */
+.step {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  color: var(--color-bg);
+  font-family: var(--font-heading);
+  font-size: 20px;
+  margin-bottom: 20px;
+}
+
+/* ============================================================
+   8. SAGE PANEL
+   ============================================================ */
+
+.panel {
+  background: var(--color-accent-2);
+  color: var(--color-accent-2-100);
+  border-radius: var(--radius-lg);
+  padding: clamp(26px, 4vw, 36px);
+}
+/* On a colored ground, text needs its own light color set explicitly —
+   the body's ink color would be unreadable. */
+.panel h3 { color: var(--color-accent-2-100); margin-bottom: 16px; }
+.panel-body { font-size: 18px; line-height: 1.7; color: var(--color-accent-2-100); }
+.panel-fine { font-size: 15px; line-height: 1.75; color: var(--color-accent-2-200); }
+
+.panel-rule {
+  border: 0;               /* hr has a default border; kill it and use height */
+  height: 1px;
+  background: rgba(240, 250, 225, 0.28);
+  margin: 24px 0;
+}
+
+/* ============================================================
+   9. IMAGE FRAMES
+   ============================================================ */
+
+/*
+  A placeholder that holds the exact space a photo will occupy. When you
+  have the real image, drop an <img> inside and delete the label span —
+  the frame does not change.
+
+  aspect-ratio is what reserves the space: the browser knows the height
+  from the width before any image loads, so nothing on the page jumps.
+*/
+.frame {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  width: 100%;
+  background: var(--color-surface);
+  overflow: hidden;        /* clips the image to the rounded corners */
+}
+
+.frame-circle { aspect-ratio: 1; border-radius: 50%; }
+.frame-43 { aspect-ratio: 4 / 3; border-radius: var(--radius-lg); }
+
+.frame-label {
+  font-size: 13px;
+  color: var(--color-neutral-600);
+  text-align: center;
+  padding: 0 12px;
+}
+
+/* object-fit: cover crops to fill the frame instead of squashing. */
+.frame img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* The design system's photo treatment: slightly desaturated and lifted,
+   so pictures sit back into the warm page rather than on top of it. */
+.washed img {
+  filter: saturate(0.6) contrast(0.85) brightness(1.1) opacity(0.94);
+}
+
+/* ============================================================
+   10. FOOTER
+   ============================================================ */
+
+footer {
+  background: var(--color-accent-900);
+  color: var(--color-accent-200);
+  padding: clamp(32px, 4vw, 48px) 0;
+}
+
+.footer-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-family: var(--font-heading);
+  font-weight: var(--font-heading-weight);
+  font-size: 20px;
+  color: var(--color-bg);
+}
+.footer-brand img {
+  width: 36px;
+  height: 36px;
+  flex: none;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+}
+
+.footer-address { font-size: 15px; line-height: 1.7; }

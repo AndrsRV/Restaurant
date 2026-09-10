@@ -6,6 +6,11 @@
     <title>Marco Restaurant</title>
 </head>
 <body>
+    <!--
+      The shell. Only three parts live here: the header, an empty #content div,
+      and the footer. Everything else is injected into #content by JavaScript,
+      so the header and footer never re-render when you switch views.
+    -->
     <header>
         <div class="logo">
             <img src="./logo_restaurant.png" alt="Venezuelan flag">
@@ -18,6 +23,18 @@
             <button id="contact-btn">Contact</button>
         </nav>
     </header>
+
+    <!-- Views get swapped in here. Empty on purpose. -->
     <div id="content"></div>
+
+    <footer>
+        <div class="wrap row-between">
+            <span class="footer-brand">
+                <img src="./logo_restaurant.png" alt="">
+                Marco
+            </span>
+            <span class="footer-address">1847 Palmetto Bay Drive, Miami, FL 33157</span>
+        </div>
+    </footer>
 </body>
 </html>
